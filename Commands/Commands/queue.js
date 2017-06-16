@@ -72,6 +72,7 @@ commands.chatVoteInit = {
     })
   }
 }
+let AdminComplete = `Put it here what it needs cause Freud is too noob`
 commands.complete = {		
    modOnly: true,		
    adminOnly: false,		
@@ -128,7 +129,7 @@ commands.complete = {
                }).then(b => {		
                  r.db('DFB').table('queue').insert({		
                    id: b.id,		
-                   type: 'adminReviewDelete',		
+                   type: 'adminComplete',		
                    author: msg.author,		
                    UvId: id,		
                    embed: b.embeds[0]		
