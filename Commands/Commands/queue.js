@@ -72,7 +72,99 @@ commands.chatVoteInit = {
     })
   }
 }
-
+commands.complete = {		
+   modOnly: true,		
+   adminOnly: false,		
+   fn: function (bot, msg, suffix, uv, cBack) {		
+     msg.channel.sendTyping()		
+     let parts = suffix.split(' ')[0].match(UVRegex)		
+     let part = suffix.split(' ')		
+     part.shift()		
+     let content = part.join(' ')		
+       }
+       return		
+     }		
+     if (content.startsWith('|')) content = content.slice(1).trim()		
+     let id		
+     if (parts === null) {		
+       id = suffix.split(' ')[0]		
+     } else {		
+       id = parts[2]		
+     }		
+     uv.v1.loginAsOwner().then(c => {		
+       c.get(`forums/${config.uservoice.forumId}/suggestions/${id}.json`).then((data) => {		
+         msg.reply(`you're about to mark ${id} for **Completion** because \`${content}\`\n__Are you sure this is correct?__ (yes/no)`).then(confirmq => {		
+           wait(bot, msg).then((q) => {		
+             if (q === null) {		
+               msg.reply('you took too long to answer, the operation has been cancelled.').then(successmsg => {		
+                 setTimeout(() => bot.Messages.deleteMessages([msg, successmsg, confirmq]), config.timeouts.messageDelete)		
+               })		
+             }		
+             if (q === false) {		
+               msg.reply('thanks for reconsidering, the operation has been cancelled.').then(successmsg => {		
+                 setTimeout(() => bot.Messages.deleteMessages([msg, successmsg, confirmq]), config.timeouts.messageDelete)		
+               })		
+             }		
+             if (q === true) {		
+               cBack({		
+                 affected: id		
+               })		
+               msg.reply('your request has been sent to the admins, thanks!').then(successmsg => {		
+                 setTimeout(() => bot.Messages.deleteMessages([msg, successmsg, confirmq]), config.timeouts.messageDelete)		
+               })		
+               bot.Channels.find(f => f.name === 'adminqueue').sendMessage(`The following card has been marked for ***completion*** by ${msg.author.username}#${msg.author.discriminator} for the following reason:\n${content}\n\nPlease review this report.`, false, {		
+                 color: 0x3498db,		
+                 author: {		
+                   name: data.suggestion.creator.name,		
+                   icon_url: data.suggestion.creator.avatar_url,		
+                   url: data.suggestion.creator.url		
+                 },		
+                 title: data.suggestion.title,		
+                 description: (data.suggestion.text.length < 1900) ? data.suggestion.text : '*Content too long*',		
+                 url: data.suggestion.url,		
+                 footer: {		
+                   text: (data.suggestion.category !== null) ? data.suggestion.category.name : 'No category'		
+                 }		
+               }).then(b => {		
+                 r.db('DFB').table('queue').insert({		
+                   id: b.id,		
+                   type: 'adminReviewDelete',		
+                   author: msg.author,		
+                   UvId: id,		
+                   embed: b.embeds[0]		
+                 }).run().then(() => {		
+                   b.addReaction({		
+                     name: 'approve',		
+                     id: '302137375092375553'		
+                   })		
+                   b.addReaction({		
+                     name: 'deny',		
+                     id: '302137375113609219'		
+                   })		
+                 }).catch(bugsnag.notify)		
+               })		
+             }		
+           })		
+         })		
+       }).catch((e) => {		
+         if (e.statusCode === 404) {		
+           msg.reply('unable to find a suggestion using your query.').then(errmsg => {		
+             setTimeout(() => bot.Messages.deleteMessages([msg, errmsg]), config.timeouts.messageDelete)		
+           })		
+         } else {		
+           logger.log(bot, {		
+             cause: 'delete_search',		
+             message: (e.message !== undefined) ? e.message : JSON.stringify(e)		
+           }, e)		
+           msg.reply('an error occured, please try again later.').then(errmsg => {		
+             setTimeout(() => bot.Messages.deleteMessages([msg, errmsg], config.timeouts.errorMessageDelete))		
+           })		
+         }		
+       })		
+     })		
+   }		
+ }		
+ 
 commands.dupe = {
   modOnly: true,
   adminOnly: false,
