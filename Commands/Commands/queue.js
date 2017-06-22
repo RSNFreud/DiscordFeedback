@@ -7,7 +7,7 @@ var genlog = require('../../Utils/generic_logger')
 var config = require('../../config.js')
 var bugsnag = require('bugsnag')
 
-var UVRegex = /https?:\/\/[\w.]+\/forums\/(\d{6,})-[\w-]+\/suggestions\/(\d{8,})(?:-[\w-]*)?/
+var UVRegex = /http[s]?:\/\/[\w.]*\/forums\/([0-9]{6,})-[\w-]+\/suggestions\/([0-9]{8,})-[\w-]*/
 
 bugsnag.register(config.discord.bugsnag)
 
@@ -72,7 +72,102 @@ commands.chatVoteInit = {
     })
   }
 }
-
+ commands.complete = {		
+    modOnly: true,		
+    adminOnly: false,		
+    fn: function (bot, msg, suffix, uv, cBack) {		
+      msg.channel.sendTyping()		
+      let parts = suffix.split(' ')[0].match(UVRegex)		
+      let part = suffix.split(' ')		
+      part.shift()		
+      let content = part.join(' ')		
+      if (content.length === 0) {		
+        msg.reply('you need to provide a reason.').then(errmsg => {		
+          setTimeout(() => errmsg.delete(), config.timeouts.errorMessageDelete)		
+        })		
+        return		
+      }		
+      if (content.startsWith('|')) content = content.slice(1).trim()		
+      let id		
+      if (parts === null) {		
+        id = suffix.split(' ')[0]		
+      } else {		
+        id = parts[2]		
+      }		
+      uv.v1.loginAsOwner().then(c => {		
+        c.get(`forums/${config.uservoice.forumId}/suggestions/${id}.json`).then((data) => {		
+          msg.reply(`you're about to mark ${id} for **Completion** because \`${content}\`\n__Are you sure this is correct?__ (yes/no)`).then(confirmq => {		
+            wait(bot, msg).then((q) => {		
+              if (q === null) {		
+                msg.reply('you took too long to answer, the operation has been cancelled.').then(successmsg => {		
+                  setTimeout(() => bot.Messages.deleteMessages([msg, successmsg, confirmq]), config.timeouts.messageDelete)		
+                })		
+              }		
+              if (q === false) {		
+                msg.reply('thanks for reconsidering, the operation has been cancelled.').then(successmsg => {		
+                  setTimeout(() => bot.Messages.deleteMessages([msg, successmsg, confirmq]), config.timeouts.messageDelete)		
+                })		
+              }		
+              if (q === true) {		
+                cBack({		
+                  affected: id		
+                })		
+                msg.reply('your report has been sent to the admins, thanks!').then(successmsg => {		
+                  setTimeout(() => bot.Messages.deleteMessages([msg, successmsg, confirmq]), config.timeouts.messageDelete)		
+                })		
+                bot.Channels.find(f => f.name === 'admin-queue').sendMessage(`The following card has been marked for ***completion*** by ${msg.author.username}#${msg.author.discriminator} for the following reason:\n${content}\n\nPlease review this report.`, false, {		
+                  color: 0x3498db,		
+                  author: {		
+                    name: data.suggestion.creator.name,		
+                    icon_url: data.suggestion.creator.avatar_url,		
+                    url: data.suggestion.creator.url		
+                  },		
+                  title: data.suggestion.title,		
+                  description: (data.suggestion.text.length < 1900) ? data.suggestion.text : '*Content too long*',		
+                  url: data.suggestion.url,		
+                  footer: {		
+                    text: (data.suggestion.category !== null) ? data.suggestion.category.name : 'No category'		
+                  }		
+                }).then(b => {		
+                  r.db('DFB').table('queue').insert({		
+                    id: b.id,		
+                    type: 'adminComplete',		
+                    author: msg.author,		
+                    UvId: id,		
+                    embed: b.embeds[0]		
+                  }).run().then(() => {		
+                    b.addReaction({		
+                      name: 'approve',		
+                      id: '302137375092375553'		
+                    })		
+                    b.addReaction({		
+                      name: 'deny',		
+                      id: '302137375113609219'		
+                    })		
+                  }).catch(bugsnag.notify)		
+                })		
+              }		
+            })		
+          })		
+        }).catch((e) => {		
+          if (e.statusCode === 404) {		
+            msg.reply('unable to find a suggestion using your query.').then(errmsg => {		
+              setTimeout(() => bot.Messages.deleteMessages([msg, errmsg]), config.timeouts.messageDelete)		
+            })		
+          } else {		
+            logger.log(bot, {		
+              cause: 'delete_search',		
+              message: (e.message !== undefined) ? e.message : JSON.stringify(e)		
+            }, e)		
+            msg.reply('an error occured, please try again later.').then(errmsg => {		
+              setTimeout(() => bot.Messages.deleteMessages([msg, errmsg], config.timeouts.errorMessageDelete))		
+            })		
+          }		
+        })		
+      })		
+    }		
+  }	
+ 
 commands.dupe = {
   modOnly: true,
   adminOnly: false,
@@ -326,7 +421,7 @@ commands.registerVote = {
                   }, e).catch(e => {
                     if (e === 'Not found') {
                       bot.Channels.get(doc.channel).sendMessage(`${user.mention}, your details are not found.`).then(errmsg => {
-                        setTimeout(() => errmsg.delete(), config.timeouts.errorMessageDelete)
+                        setTimeout(() => bot.Messages.deleteMessages([msg, errmsg], config.timeouts.errorMessageDelete))
                       })
                     } else {
                       logger.log(bot, {
@@ -395,11 +490,11 @@ commands.registerVote = {
                   }).catch(e => {
                     if (e.statusCode === 404) {
                       bot.Channels.get(config.discord.feedChannel).sendMessage('The suggestion is no longer available to be voted on.').then(errmsg => {
-                        setTimeout(() => bot.Messages.deleteMessages([msg, errmsg]), config.timeouts.errorMessageDelete)
+                        setTimeout(() => bot.Messages.deleteMessages([msg, errmsg], config.timeouts.errorMessageDelete))
                       })
                     } else if (e.statusCode === 422) {
                       bot.Channels.get(config.discord.feedChannel).sendMessage('The suggestion is no longer open for voting.').then(errmsg => {
-                        setTimeout(() => bot.Messages.deleteMessages([msg, errmsg]), config.timeouts.errorMessageDelete)
+                        setTimeout(() => bot.Messages.deleteMessages([msg, errmsg], config.timeouts.errorMessageDelete))
                       })
                     } else {
                       logger.log(bot, {
@@ -415,7 +510,7 @@ commands.registerVote = {
                   }, e).catch(e => {
                     if (e === 'Not found') {
                       bot.Channels.get(config.discord.feedChannel).sendMessage(`${user.mention}, your details are not found.`).then(errmsg => {
-                        setTimeout(() => errmsg.delete(), config.timeouts.errorMessageDelete)
+                        setTimeout(() => bot.Messages.deleteMessages([msg, errmsg], config.timeouts.errorMessageDelete))
                       })
                     } else {
                       logger.log(bot, {
@@ -430,7 +525,7 @@ commands.registerVote = {
             r.db('DFB').table('queue').get(doc.id).update(doc).run().catch(bugsnag.nofify)
             break
           }
-        case 'adminReviewDelete':
+        case 'adminComplete':
           {
             if (reaction.id === '302137375113609219') {
               genlog.log(bot, user, {
@@ -444,13 +539,13 @@ commands.registerVote = {
               genlog.log(bot, user, {
                 message: 'Approved a report',
                 affected: doc.UvId,
-                result: `Card with ID ${doc.UvId} has been deleted`
+                result: `Card with ID ${doc.UvId} has been marked as complete`
               })
 
-              bot.Channels.find(c => c.name === 'admin-queue').sendMessage(`The report for ${doc.embed.title} has been approved, the card has been deleted from Uservoice.`).then(o => {
+              bot.Channels.find(c => c.name === 'admin-queue').sendMessage(`The report for ${doc.embed.title} has been approved, the card has been marked as complete in Uservoice.`).then(o => {
                 setTimeout(() => bot.Messages.deleteMessages([o.id, msg.id], bot.Channels.find(c => c.name === 'admin-queue').id), config.timeouts.messageDelete)
               })
-              deleteFromUV(doc.UvId, uv, bot)
+              CompleteCard(doc.UvId, uv, bot)
               r.db('DFB').table('queue').get(doc.id).delete().run().catch(bugsnag.nofify)
             }
             break
@@ -518,7 +613,7 @@ function merge (target, dupe, uv) {
   })
 }
 
-function deleteFromUV (UVID, uvClient, bot) {
+function CompleteCard (UVID, uvClient, bot) {
   uvClient.v1.loginAsOwner().then(i => {
     i.delete(`forums/${config.uservoice.forumId}/suggestions/${UVID}.json`).catch((e) => {
       logger.log(bot, {
