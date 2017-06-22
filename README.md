@@ -1,27 +1,17 @@
 # DiscordFeedback
 The bot that powers the Discord Feedback server
 
-# Install
-If you have npm you can install the bot very easily, just run
-```
-npm i
-```
-in the repository root and
+# Selfhosting
+We don't (fully) support hosting your own copy of DiscordFeedback, this program is highly customized and not suited to run outside of the official Discord Feedback server.
 
-```npm run-script dbcreate
-```
+However, if you do want to run an instance, you need the following:
 
-You will also need [rethinkdb](https://www.rethinkdb.com/) by downloading it and running it from command prompt
-
-Before running the bot there is a few items to be replaced, they are as follows, replace the uservoice details with your info, the discord bot token, and role ids (from the server that you are wanting to run the bot in, you need to make sure you have these roles added to your user or else you wouldn't be able to use the bot!) in the config.js file
-.
-
-# Run
-You can run the bot just as easliy as you can install it, just run
-
-```
-npm start
-```
-in the repository root
-
-If you are getting a bunch of errors in console, make sure that rethinkdb is running
+- UserVoice API keys
+- Discord bot account
+- [RethinkDB](https://www.rethinkdb.com)sq
+- Discord server (duh)
+  - Server **must** have channels named `bot-log`, `admin-queue` and `bot-error`.
+  
+  
+  
+  
