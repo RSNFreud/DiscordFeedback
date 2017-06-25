@@ -221,13 +221,13 @@ commands.dupe = {
           }).then(() => {
             wait(bot, msg).then((q) => {
               if (q === null) {
-                msg.reply('you took too long to answer, the operation has been cancelled.').then(successmsg => {
-                  setTimeout(() => bot.Messages.deleteMessages([msg, successmsg]), config.timeouts.errorMessageDelete)
+                msg.reply('you took too long to answer, the operation has been cancelled.').then(errmsg => {
+                  setTimeout(() => bot.Messages.deleteMessages([msg, errmsg]), config.timeouts.errorMessageDelete)
                 })
               }
               if (q === false) {
                 msg.reply('thanks for reconsidering, the operation has been cancelled.').then(successmsg => {
-                  setTimeout(() => bot.Messages.deleteMessages([msg, successmsg]), config.timeouts.errorMessageDelete)
+                  setTimeout(() => bot.Messages.deleteMessages([msg, successmsg]), config.timeouts.messageDelete)
                 })
               }
               if (q === true) {
@@ -235,7 +235,7 @@ commands.dupe = {
                   affected: id
                 })
                 msg.reply('your report has been sent to the admins, thanks!').then(successmsg => {
-                  setTimeout(() => bot.Messages.deleteMessages([msg, successmsg]), config.timeouts.errorMessageDelete)
+                  setTimeout(() => bot.Messages.deleteMessages([msg, successmsg]), config.timeouts.messageDelete)
                 })
                 bot.Channels.find(f => f.name === 'admin-queue').sendMessage(`Merge **${data.suggestion.title}** (${id2}) into **${data2.suggestion.title}** (${id})?`, false, {
                   color: 0x3498db,
@@ -571,7 +571,7 @@ commands.registerVote = {
               bot.Channels.find(c => c.name === 'admin-queue').sendMessage(`The report for ${doc.embed.title} has been approved, the card has been marked as complete in Uservoice.`).then(o => {
                 setTimeout(() => bot.Messages.deleteMessages([o.id, msg.id], bot.Channels.find(c => c.name === 'admin-queue').id), config.timeouts.messageDelete)
               })
-              CompleteCard(doc.UvId, uv, bot)
+              CompleteCard(doc.UvId, uv, bot, user)
               r.db('DFB').table('queue').get(doc.id).delete().run().catch(bugsnag.nofify)
             }
             break
@@ -639,7 +639,7 @@ function merge (target, dupe, uv) {
   })
 }
 
-function CompleteCard (UVID, uvClient, bot, user) {
+function CompleteCard (UVID, uvClient, bot, user, id, content) {
  getMail(uvClient, user.id).then(f => {
    uvClient.v1.loginAs(f).then(c => {
    c.put(`forums/${config.uservoice.forumId}/suggestions/${id}/respond.json`, {
@@ -649,11 +649,9 @@ function CompleteCard (UVID, uvClient, bot, user) {
      }
    }).then(data => {
      let uvurl = `https://${config.uservoice.subdomain}.${config.uservoice.domain}/forums/${config.uservoice.forumId}/suggestions/${id}`
+	 
    })
-   cBack({
-     affected: id,
-     result: 'A ticket\'s status was updated to' + statusName
-   })
+   
    }).catch(e => {
      if (e.statusCode === 404) {
        msg.reply('unable to find a suggestion using your query.')
@@ -703,7 +701,7 @@ function switchIDs (og, bot) {
 
 function getMail (uv, user) {
   return new Promise(function (resolve, reject) {
-    if (config.debug === true) return resolve('hello@dougley.com') // no dox pls
+    if (config.debug === true) return resolve('jared@discordapp.com') // no dox pls
     uv.v1.loginAsOwner().then(i => {
       i.get('users/search.json', {
         guid: user
