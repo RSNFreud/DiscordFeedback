@@ -651,7 +651,7 @@ function CompleteCard (UVID, uvClient, bot, user, id, content) {
        status_id: 1707882,
        text: content
      }
-   }).then{
+   }).then {
      let uvurl = `https://${config.uservoice.subdomain}.${config.uservoice.domain}/forums/${config.uservoice.forumId}/suggestions/${id}`
 	 
    }
