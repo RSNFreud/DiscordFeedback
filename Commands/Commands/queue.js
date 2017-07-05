@@ -652,10 +652,10 @@ function CompleteCard (msg, bot, uvClient, user, id, content) {
        text: content
      }
    })
-})
-   
-   }.catch(e => {
+})  
+  } 
      if (e.statusCode === 404) {
+  	 .catch(e => {
        msg.reply('unable to find a suggestion using your query.')
      }
      else {
@@ -667,7 +667,6 @@ function CompleteCard (msg, bot, uvClient, user, id, content) {
      })
    }
 }
-
 function deleteFromUV (UVID, uvClient, bot) {
   uvClient.v1.loginAsOwner().then(i => {
     i.delete(`forums/${config.uservoice.forumId}/suggestions/${UVID}.json`).catch((e) => {
