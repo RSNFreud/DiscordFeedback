@@ -643,7 +643,7 @@ function merge (target, dupe, uv) {
     })
   })
 }
-function CompleteCard (UVID, uvClient, bot, user, id, content) {
+function CompleteCard (uvClient, user, id, content) {
  getMail(uvClient, user.id).then(f => {
    uvClient.v1.loginAs(f).then(c => {
    c.put(`forums/${config.uservoice.forumId}/suggestions/${id}/respond.json`, {
@@ -651,10 +651,10 @@ function CompleteCard (UVID, uvClient, bot, user, id, content) {
        status_id: 1707882,
        text: content
      }
-   }).then {
+   }).then
      let uvurl = `https://${config.uservoice.subdomain}.${config.uservoice.domain}/forums/${config.uservoice.forumId}/suggestions/${id}`
 	 
-   }
+   })
    
    }).catch(e => {
      if (e.statusCode === 404) {
@@ -668,8 +668,7 @@ function CompleteCard (UVID, uvClient, bot, user, id, content) {
        msg.reply('an error occured, please try again later.')
      }
     })
-  })
-}
+  }
 
 function deleteFromUV (UVID, uvClient, bot) {
   uvClient.v1.loginAsOwner().then(i => {
