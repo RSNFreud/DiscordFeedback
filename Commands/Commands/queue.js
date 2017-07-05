@@ -652,9 +652,9 @@ function CompleteCard (msg, bot, uvClient, user, id, content) {
        text: content
      }
    })
-}
+})
    
-   }).catch(e => {
+   }.catch(e => {
      if (e.statusCode === 404) {
        msg.reply('unable to find a suggestion using your query.')
      }
@@ -664,8 +664,8 @@ function CompleteCard (msg, bot, uvClient, user, id, content) {
          message: (e.message !== undefined) ? e.message : JSON.stringify(e)
        }, e)
        msg.reply('an error occured, please try again later.')
-     }
-   })
+     })
+   }
 }
 
 function deleteFromUV (UVID, uvClient, bot) {
