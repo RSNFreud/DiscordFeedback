@@ -651,6 +651,7 @@ function CompleteCard (msg, bot, uvClient, user, id, content) {
        status_id: 1707882,
        text: content
      }
+	 }
    })
    
    }).catch(e => {
