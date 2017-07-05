@@ -252,9 +252,9 @@ commands.dupe = {
   }
 }
 commands.complete = {		
-    modOnly: true,		
-    adminOnly: false,		
-    fn: function (bot, msg, suffix, uv, cBack) {		
+  modOnly: true,		
+  adminOnly: false,		
+  fn: function (bot, msg, suffix, uv, cBack) {		
       msg.channel.sendTyping()		
       let parts = suffix.split(' ')[0].match(UVRegex)		
       let part = suffix.split(' ')		
@@ -345,7 +345,7 @@ commands.complete = {
         })		
       })		
     }		
-  }	
+}	
 commands.registerVote = {
   internal: true,
   fn: function (msg, reaction, bot, uv, user) {
@@ -558,7 +558,7 @@ commands.registerVote = {
         break
       }
       case 'adminComplete':
-          {
+        {
             if (reaction.id === '327732629678063617') { //Replace with correct one in live
               genlog.log(bot, user, {
                 message: 'Dismissed a report',
@@ -643,17 +643,14 @@ function merge (target, dupe, uv) {
     })
   })
 }
-function CompleteCard (uvClient, user, id, content) {
- getMail(uvClient, user.id).then(f => {
+function CompleteCard (msg, bot, uvClient, user, id, content) {
+  getMail(uvClient, user.id).then(f => {
    uvClient.v1.loginAs(f).then(c => {
-   c.put(`forums/${config.uservoice.forumId}/suggestions/${id}/respond.json`, {
+     c.put(`forums/${config.uservoice.forumId}/suggestions/${id}/respond.json`, {
      response: {
        status_id: 1707882,
        text: content
      }
-   }).then
-     let uvurl = `https://${config.uservoice.subdomain}.${config.uservoice.domain}/forums/${config.uservoice.forumId}/suggestions/${id}`
-	 
    })
    
    }).catch(e => {
@@ -667,8 +664,8 @@ function CompleteCard (uvClient, user, id, content) {
        }, e)
        msg.reply('an error occured, please try again later.')
      }
-    })
-  }
+   })
+}
 
 function deleteFromUV (UVID, uvClient, bot) {
   uvClient.v1.loginAsOwner().then(i => {
