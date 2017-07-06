@@ -255,26 +255,26 @@ commands.complete = {
   modOnly: true,		
   adminOnly: false,		
   fn: function (bot, msg, suffix, uv, cBack) {		
-  msg.channel.sendTyping()		
+    msg.channel.sendTyping()		
     let parts = suffix.split(' ')[0].match(UVRegex)		
     let part = suffix.split(' ')		
     part.shift()		
     let content = part.join(' ')		
     if (content.length === 0) {		
-        msg.reply('you need to provide a reason.').then(errmsg => {		
+      msg.reply('you need to provide a reason.').then(errmsg => {		
           setTimeout(() => errmsg.delete(), config.timeouts.errorMessageDelete)		
         })		
-        return		
-      }		
+      return		
+     }		
     if (content.startsWith('|')) content = content.slice(1).trim()		
     let id		
     if (parts === null) {			
-        id = suffix.split(' ')[0]		
-      } else {		
-        id = parts[2]		
-      }		
+      id = suffix.split(' ')[0]		
+    } else {		
+      id = parts[2]		
+    }		
     uv.v1.loginAsOwner().then(c => {		
-        c.get(`forums/${config.uservoice.forumId}/suggestions/${id}.json`).then((data) => {		
+      c.get(`forums/${config.uservoice.forumId}/suggestions/${id}.json`).then((data) => {		
           msg.reply(`you're about to mark ${id} for **completion** because \`${content}\`\n__Are you sure this is correct?__ (yes/no)`).then(confirmq => {		
             wait(bot, msg).then((q) => {		
               if (q === null) {		
@@ -343,7 +343,7 @@ commands.complete = {
             })		
           }		
         })		
-      })		
+    })		
   }		
 }	
 commands.registerVote = {
@@ -560,14 +560,14 @@ commands.registerVote = {
       case 'adminComplete':
         {
           if (reaction.id === '327732629678063617') { //Replace with correct one in live
-              genlog.log(bot, user, {
+            genlog.log(bot, user, {
                 message: 'Dismissed a report',
                 affected: doc.UvId
               })
-              bot.Channels.find(c => c.name === 'admin-queue').sendMessage(`The report for \`${doc.embed.title}\` has been dismissed, no action has been taken.`).then(o => {
+            bot.Channels.find(c => c.name === 'admin-queue').sendMessage(`The report for \`${doc.embed.title}\` has been dismissed, no action has been taken.`).then(o => {
                 setTimeout(() => bot.Messages.deleteMessages([o, msg]), config.timeouts.messageDelete)
               })
-            } else if (reaction.id === '327732629459828748') { //Replace with correct in live
+          } else if (reaction.id === '327732629459828748') { //Replace with correct in live
               genlog.log(bot, user, {
                 message: 'Approved a report',
                 affected: doc.UvId,
@@ -648,27 +648,27 @@ function merge (target, dupe, uv, bot) {
 }
 function CompleteCard (msg, bot, uvClient, user, id, content) {
   getMail(uvClient, user.id).then(f => {
-  uvClient.v1.loginAs(f).then(c => {
-     c.put(`forums/${config.uservoice.forumId}/suggestions/${id}/respond.json`, {
+    uvClient.v1.loginAs(f).then(c => {
+    c.put(`forums/${config.uservoice.forumId}/suggestions/${id}/respond.json`, {
        response: {
-       status_id: 1707882,
-       text: content
-     }
+         status_id: 1707882,
+         text: content
+       }
 
      }).catch(e => {
-     if (e.statusCode === 404) {
-     msg.reply('unable to find a suggestion using your query.')
-   }
-     else {
-     logger.log(bot, {
-         cause: 'status_change',
-         message: (e.message !== undefined) ? e.message : JSON.stringify(e)
-       }, e)
-     msg.reply('an error occured, please try again later.')
+         if (e.statusCode === 404) {
+         msg.reply('unable to find a suggestion using your query.')
+       }
+         else {
+         logger.log(bot, {
+     cause: 'status_change',
+     message: (e.message !== undefined) ? e.message : JSON.stringify(e)
+   }, e)
+   msg.reply('an error occured, please try again later.')
 
-   }
-   })
-   })
+      }
+     })
+    })
   })
 }
                                
