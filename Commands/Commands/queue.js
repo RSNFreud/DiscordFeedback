@@ -656,21 +656,20 @@ function CompleteCard (msg, bot, uvClient, user, id, content) {
      }
 
    }).catch(e => {
-if (e.statusCode === 404) {
-msg.reply('unable to find a suggestion using your query.')
-}
-else {
-logger.log(bot, {
-cause: 'status_change',
-message: (e.message !== undefined) ? e.message : JSON.stringify(e)
-}, e)
-msg.reply('an error occured, please try again later.')
+   if (e.statusCode === 404) {
+       msg.reply('unable to find a suggestion using your query.')
+    })
+      else {
+       logger.log(bot, {
+       cause: 'status_change',
+       message: (e.message !== undefined) ? e.message : JSON.stringify(e)
+    }, e)
+         msg.reply('an error occured, please try again later.')
 
-})
-
-  })
-
-}
+       }
+     })
+    }
+                               
 function deleteFromUV (UVID, uvClient, bot) {
   uvClient.v1.loginAsOwner().then(i => {
     i.delete(`forums/${config.uservoice.forumId}/suggestions/${UVID}.json`).catch((e) => {
