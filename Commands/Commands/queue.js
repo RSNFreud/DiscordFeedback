@@ -666,9 +666,11 @@ function CompleteCard (msg, bot, uvClient, user, id, content) {
     }, e)
          msg.reply('an error occured, please try again later.')
 
-       })
+       }
      })
-    }
+    })
+  })
+}
                                
 function deleteFromUV (UVID, uvClient, bot) {
   uvClient.v1.loginAsOwner().then(i => {
