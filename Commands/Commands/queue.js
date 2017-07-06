@@ -658,7 +658,7 @@ function CompleteCard (msg, bot, uvClient, user, id, content) {
    }).catch(e => {
    if (e.statusCode === 404) {
        msg.reply('unable to find a suggestion using your query.')
-    })
+    }
       else {
        logger.log(bot, {
        cause: 'status_change',
@@ -666,7 +666,7 @@ function CompleteCard (msg, bot, uvClient, user, id, content) {
     }, e)
          msg.reply('an error occured, please try again later.')
 
-       }
+       })
      })
     }
                                
