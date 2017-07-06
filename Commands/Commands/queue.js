@@ -651,21 +651,22 @@ function CompleteCard (msg, bot, uvClient, user, id, content) {
        status_id: 1707882,
        text: content
      }
-   })
-})  
-  } 
-     if (e.statusCode === 404) {
-  	 .catch(e => {
-       msg.reply('unable to find a suggestion using your query.')
-     }
-     else {
-       logger.log(bot, {
-         cause: 'status_change',
-         message: (e.message !== undefined) ? e.message : JSON.stringify(e)
-       }, e)
-       msg.reply('an error occured, please try again later.')
-     })
-   }
+
+   }).catch(e => {
+if (e.statusCode === 404) {
+msg.reply('unable to find a suggestion using your query.')
+}
+else {
+logger.log(bot, {
+cause: 'status_change',
+message: (e.message !== undefined) ? e.message : JSON.stringify(e)
+}, e)
+msg.reply('an error occured, please try again later.')
+
+})
+
+  })
+
 }
 function deleteFromUV (UVID, uvClient, bot) {
   uvClient.v1.loginAsOwner().then(i => {
