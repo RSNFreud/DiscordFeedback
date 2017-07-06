@@ -317,11 +317,11 @@ commands.complete = {
                }).run().then(() => {
                  b.addReaction({
                    name: 'approve',
-                   id: '302137375092375553'
+                   id: '327732629459828748' //'302137375092375553'
                  })
                  b.addReaction({
                    name: 'deny',
-                   id: '302137375113609219'
+                   id: '327732629678063617 ' //'302137375113609219'
                  })
                }).catch(bugsnag.notify)
              })
@@ -345,7 +345,7 @@ commands.complete = {
    })
   })       
  }
-}
+}	
 commands.registerVote = {
   internal: true,
   fn: function (msg, reaction, bot, uv, user) {
