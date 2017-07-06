@@ -559,7 +559,7 @@ commands.registerVote = {
       }
       case 'adminComplete':
         {
-          if (reaction.id === '327732629678063617') { //Replace with correct one in live
+          if (reaction.id === '302137375113609219') {
             genlog.log(bot, user, {
               message: 'Dismissed a report',
               affected: doc.UvId
@@ -567,7 +567,7 @@ commands.registerVote = {
             bot.Channels.find(c => c.name === 'admin-queue').sendMessage(`The report for \`${doc.embed.title}\` has been dismissed, no action has been taken.`).then(o => {
               setTimeout(() => bot.Messages.deleteMessages([o, msg]), config.timeouts.messageDelete)
             })
-          } else if (reaction.id === '327732629459828748') { //Replace with correct in live
+          } else if (reaction.id === '302137375092375553') {
             genlog.log(bot, user, {
               message: 'Approved a report',
               affected: doc.UvId,
